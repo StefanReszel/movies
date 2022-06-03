@@ -9,7 +9,7 @@ class RegisterForm(FlaskForm):
         label="Nazwa użytkownika",
         validators=[
             DataRequired(),
-            Length(min=6),
+            Length(min=4),
             ],
         )
     password = PasswordField(
@@ -17,7 +17,7 @@ class RegisterForm(FlaskForm):
         validators=[
             DataRequired(),
             EqualTo('confirm_password', message="Hasło w obu polach musi być takie same."),
-            Length(min=6),
+            Length(min=4),
             ],
         )
     confirm_password = PasswordField(
@@ -26,5 +26,5 @@ class RegisterForm(FlaskForm):
 
 
 class LoginForm(FlaskForm):
-    username = StringField(label="Nazwa użytkownika", validators=[Length(min=6)])
-    password = PasswordField(label="Hasło", validators=[Length(min=6)])
+    username = StringField(label="Nazwa użytkownika", validators=[Length(min=4)])
+    password = PasswordField(label="Hasło", validators=[Length(min=4)])

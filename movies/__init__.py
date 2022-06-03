@@ -25,4 +25,9 @@ def create_app():
     from .accounts.urls import accounts_bp
     app.register_blueprint(accounts_bp)
 
+    from .movies.urls import movies_bp
+    app.register_blueprint(movies_bp)
+
+    app.add_url_rule('/', endpoint='index')
+
     return app

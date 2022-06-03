@@ -7,28 +7,11 @@
     
 
 {% block content %}
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-<ul class="errors">
-    {% for message in messages %}
-        <li>{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-{% endwith %}
-    
+{% include 'form_errors.html' %}
+
 <form method="POST">
-    {% for field in form %}
-        {% if field.id == "csrf_token" %}
-            {{ field }}
-        {% else %}
-            <p>
-                {{ field.label }}
-                <br>
-                {{ field }}
-            </p>
-        {% endif %}
-    {% endfor %}
+    {% include 'render_form_fields.html' %}
     <button type="submit">Zaloguj się</button>
 </form>
+<p>Jeżeli nie masz konta możesz je założyć <a href="{{ url_for('accounts.register') }}">tutaj</a>.</p>
 {% endblock content %}

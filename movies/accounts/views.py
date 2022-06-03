@@ -5,11 +5,22 @@ from flask_login import login_user, login_required, logout_user
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from datetime import date
+
 from sqlalchemy.exc import IntegrityError
 
 from movies import db, login_manager
 from .models import User
 from .forms import RegisterForm, LoginForm
+
+
+login_manager.login_view = "accounts.login"
+login_manager.login_message = "Proszę się zalogować."
+
+
+@login_manager.unauthorized_handler
+def unauthorized():
+    return redirect(url_for("accounts.login"))
 
 
 @login_manager.user_loader
@@ -32,16 +43,21 @@ class RegisterView(MethodView):
             new_user = User(
                 username=username,
                 password=generate_password_hash(password),
+                registration_date=date.today(),
             )
 
             try:
                 db.session.add(new_user)
                 db.session.commit()
 
+                success_message = "Utworzono konto."
+                flash(success_message)
+
                 return redirect(url_for("accounts.login"))
 
             except IntegrityError:
-                form.username.errors.append("Użytkownik o takiej nazwie już istnieje.")
+                error = "Użytkownik o takiej nazwie już istnieje."
+                flash(error)
 
         return render_template('accounts/register.html', form=form)
 
@@ -61,6 +77,15 @@ class LoginView(MethodView):
 
         if user and check_password_hash(user.password, password):
             login_user(user)
+
+            days_since_registration = (date.today() - user.registration_date).days
+
+            hello_message = f"Witaj, {user.username}."
+            ammount_of_days_message = f"Jesteś z nami {days_since_registration} dni."
+
+            flash(hello_message)
+            flash(ammount_of_days_message)
+
             return redirect(url_for('index'))
 
         error = 'Błedna nazwa użytkownika lub hasło.'

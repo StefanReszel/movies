@@ -5,9 +5,27 @@
 </head>
 <body>
 {% if current_user.is_authenticated %}
+    {% if request.path != url_for('index') %}
+        <a href="{{ url_for('index') }}">Główna</a>
+    {% endif %}
     <a href="{{ url_for('accounts.logout') }}">Wyloguj</a>
-{% endif %}
     
+{% endif %}
+
+{% if not current_user.is_authenticated and request.path != url_for('accounts.login') %}
+    <a href="{{ url_for('accounts.login') }}">Zaloguj się</a>
+{% endif %}
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul class="errors">
+    {% for message in messages %}
+        <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+
 {% block content %}
 {% endblock content %}
 </body>
