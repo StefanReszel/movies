@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+    LOGOWANIE
+{% endblock title %}
+    
+
+{% block content %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul class="errors">
+    {% for message in messages %}
+        <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+    
+<form method="POST">
+    {% for field in form %}
+        {% if field.id == "csrf_token" %}
+            {{ field }}
+        {% else %}
+            <p>
+                {{ field.label }}
+                <br>
+                {{ field }}
+            </p>
+        {% endif %}
+    {% endfor %}
+    <button type="submit">Zaloguj się</button>
+</form>
+{% endblock content %}

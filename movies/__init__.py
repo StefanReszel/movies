@@ -1,8 +1,12 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect
+from flask_login import LoginManager
 
 
 db = SQLAlchemy()
+csrf = CSRFProtect()
+login_manager = LoginManager()
 
 
 def create_app():
@@ -13,7 +17,10 @@ def create_app():
     app.config['SECRET_KEY'] = 'dev'
 
     app.url_map.strict_slashes = False
+
     db.init_app(app)
+    csrf.init_app(app)
+    login_manager.init_app(app)
 
     from .accounts.urls import accounts_bp
     app.register_blueprint(accounts_bp)

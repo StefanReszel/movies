@@ -23,3 +23,8 @@ class RegisterForm(FlaskForm):
     confirm_password = PasswordField(
         label="Powtórz hasło",
         )
+
+
+class LoginForm(FlaskForm):
+    username = StringField(label="Nazwa użytkownika", validators=[Length(min=6)])
+    password = PasswordField(label="Hasło", validators=[Length(min=6)])
