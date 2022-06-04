@@ -5,6 +5,9 @@ from flask_login import login_required, current_user
 
 from movies import db
 
+from sqlalchemy.exc import SQLAlchemyError
+
+
 from .models import Movie
 from .forms import MovieForm
 
@@ -35,13 +38,17 @@ class MovieCreateView(MethodView):
                 added_by=current_user.id
             )
 
-            db.session.add(movie)
-            db.session.commit()
+            try:
+                db.session.add(movie)
+                db.session.commit()
+            except SQLAlchemyError:
+                error = "Wystąpił błąd, spróbuj ponownie."
+                flash(error)
+            else:
+                success_message = "Dodano film."
+                flash(success_message)
 
-            success_message = "Dodano film."
-            flash(success_message)
-
-            return redirect(url_for("movies.detail", id=movie.id))
+                return redirect(url_for("movies.detail", id=movie.id))
 
         return render_template('movies/create.html', form=form)
 

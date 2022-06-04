@@ -1,13 +1,13 @@
 from flask import render_template, request, redirect, url_for, flash
 from flask.views import MethodView, View
 
-from flask_login import login_user, login_required, logout_user
+from flask_login import current_user, login_user, login_required, logout_user
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from datetime import date
 
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from movies import db, login_manager
 from .models import User
@@ -30,6 +30,8 @@ def load_user(user_id):
 
 class RegisterView(MethodView):
     def get(self):
+        if current_user.is_authenticated:
+            return redirect(url_for('index'))
         form = RegisterForm()
         return render_template('accounts/register.html', form=form)
 
@@ -49,15 +51,17 @@ class RegisterView(MethodView):
             try:
                 db.session.add(new_user)
                 db.session.commit()
-
+            except IntegrityError:
+                error = "Użytkownik o takiej nazwie już istnieje."
+                flash(error)
+            except SQLAlchemyError:
+                error = "Wystąpił błąd, spróbuj ponownie."
+                flash(error)
+            else:
                 success_message = "Utworzono konto."
                 flash(success_message)
 
                 return redirect(url_for("accounts.login"))
-
-            except IntegrityError:
-                error = "Użytkownik o takiej nazwie już istnieje."
-                flash(error)
 
         return render_template('accounts/register.html', form=form)
 
