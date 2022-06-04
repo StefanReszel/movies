@@ -7,9 +7,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from datetime import date
 
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.exc import IntegrityError
 
 from movies import db, login_manager
+from movies.utilities import add_obj_to_db
+
 from .models import User
 from .forms import RegisterForm, LoginForm
 
@@ -48,20 +50,18 @@ class RegisterView(MethodView):
                 registration_date=date.today(),
             )
 
-            try:
-                db.session.add(new_user)
-                db.session.commit()
-            except IntegrityError:
-                error = "Użytkownik o takiej nazwie już istnieje."
-                flash(error)
-            except SQLAlchemyError:
-                error = "Wystąpił błąd, spróbuj ponownie."
-                flash(error)
-            else:
+            error = add_obj_to_db(db, new_user)
+
+            if not error:
                 success_message = "Utworzono konto."
                 flash(success_message)
 
                 return redirect(url_for("accounts.login"))
+
+            if isinstance(error, IntegrityError):
+                error.message = "Użytkownik o takiej nazwie już istnieje."
+
+            flash(error.message)
 
         return render_template('accounts/register.html', form=form)
 

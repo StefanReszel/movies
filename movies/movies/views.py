@@ -4,9 +4,7 @@ from flask.views import MethodView, View
 from flask_login import login_required, current_user
 
 from movies import db
-
-from sqlalchemy.exc import SQLAlchemyError
-
+from movies.utilities import add_obj_to_db
 
 from .models import Movie
 from .forms import MovieForm
@@ -38,17 +36,15 @@ class MovieCreateView(MethodView):
                 added_by=current_user.id
             )
 
-            try:
-                db.session.add(movie)
-                db.session.commit()
-            except SQLAlchemyError:
-                error = "Wystąpił błąd, spróbuj ponownie."
-                flash(error)
-            else:
+            error = add_obj_to_db(db, movie)
+
+            if not error:
                 success_message = "Dodano film."
                 flash(success_message)
 
                 return redirect(url_for("movies.detail", id=movie.id))
+
+            flash(error.message)
 
         return render_template('movies/create.html', form=form)
 
