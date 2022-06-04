@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 
-from wtforms.fields import StringField
+from wtforms.fields import StringField, TextAreaField
 from wtforms.validators import DataRequired
 
 
@@ -9,10 +9,7 @@ class MovieForm(FlaskForm):
         label="Tytuł filmu",
         validators=[DataRequired()]
         )
-
-
-class OpinionForm(FlaskForm):
-    title = StringField(
-        label="Twoja opinia",
+    opinion = TextAreaField(
+        label="Opinia",
         validators=[DataRequired()]
         )

@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 from movies import db
 from movies.utilities import add_obj_to_db
 
-from .models import Movie
+from .models import Movie, Opinion
 from .forms import MovieForm
 
 
@@ -14,7 +14,7 @@ class MovieListView(View):
     decorators = [login_required]
 
     def dispatch_request(self):
-        movies = Movie.query.all()
+        movies = Movie.query.filter_by(added_by=current_user.id)
         return render_template('movies/index.html', movies=movies)
 
 
@@ -30,6 +30,7 @@ class MovieCreateView(MethodView):
 
         if form.validate_on_submit():
             title = request.form['title']
+            opinion = request.form['opinion']
 
             movie = Movie(
                 title=title,
@@ -39,10 +40,20 @@ class MovieCreateView(MethodView):
             error = add_obj_to_db(db, movie)
 
             if not error:
-                success_message = "Dodano film."
-                flash(success_message)
+                movie_id = movie.id
 
-                return redirect(url_for("movies.detail", id=movie.id))
+                opinion = Opinion(
+                    content=opinion,
+                    movie_id=movie_id
+                )
+
+                error = add_obj_to_db(db, opinion)
+
+                if not error:
+                    success_message = "Dodano film."
+                    flash(success_message)
+
+                    return redirect(url_for("movies.detail", id=movie_id))
 
             flash(error.message)
 
@@ -53,4 +64,8 @@ class MovieDetailView(View):
     decorators = [login_required]
 
     def dispatch_request(self, id):
-        return "Dodano film."
+        context = {
+            'movie': Movie.query.get(id),
+            'opinion': Opinion.query.filter_by(movie_id=id).first(),
+        }
+        return render_template('movies/detail.html', **context)
